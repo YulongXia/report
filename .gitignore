@@ -1,6 +1,6 @@
 # ignore resource
-input/*
-std_json/*
+input/
+std_json/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

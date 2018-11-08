@@ -7,13 +7,13 @@ import pandas as pd
 from report.workflow.workflow import workflow
 from report.component.batchprocessingunsolvedquery import batchprocessingunsolvedquery
 from report.component.gentblunsolvedquery import gentblunsolvedquery
+from report.component.comparer import comparer
 from data_management.accessdb.accessRDB import accessRDB
 
 def gen_corpus(data,output):
     result = {"query":[ele["query"] for ele in data]}
     df = pd.DataFrame(result)
     df.to_excel(output,index=False)
-    # print(result)
     return result
 
 
@@ -35,6 +35,3 @@ if __name__ == "__main__":
         processors = [batchprocessingunsolvedquery(**conf),gentblunsolvedquery(**conf)]
         for processor in processors:
             processor.process(info)
-
-
-
