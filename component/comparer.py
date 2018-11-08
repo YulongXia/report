@@ -103,6 +103,3 @@ class comparer(abstract.abstract):
                 tmp = [ row["query"] for row in a.execute(stmt="""select query from tbl_corpus where id in ({ids})""".format(ids=res["corpus_ids"])) ]
                 ret = "\n---\n".join(tmp)
         return ret
-
-
-
