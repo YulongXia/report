@@ -10,7 +10,7 @@ from data_management.accessdb.accessRDB import accessRDB
 from . import abstract
 
 class genstdanslib(abstract.abstract):
-    tpl_correct_corpus_ids = {"taixingxiao":"""select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id like "taixingxiao.2.%" and corpus_id not in (select distinct(corpus_id) from ((select distinct(corpus_id) from tbl_tag_taixingxiao where (desc_id = "taixingxiao.2.1" or desc_id = "taixingxiao.2.23") and key_id = 23 and value not in ('已解决','1.0','1_推荐','推荐_1','1')) union (select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id = "taixingxiao.2.22" and key_id = 48 and value = '未标注') union (select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id like "taixingxiao.5.%" and key_id = 67 and value not in ('已解决','1.0','1_推荐','推荐_1','1'))) as a)"""}
+    tpl_correct_corpus_ids = {"taixingxiao":"""select distinct(corpus_id) from tbl_tag_taixingxiao where (desc_id like "taixingxiao.2.%" or desc_id like "taixingxiao.5.%")and corpus_id not in (select distinct(corpus_id) from ((select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id = "taixingxiao.2.22" and key_id = (select id from tbl_key where key_name = "处理情况") and value = '未标注') union (select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id like "taixingxiao.5.%" and key_id = (select id from tbl_key where key_name = "hual_解决状态") and value not in ('已解决','1.0','1_推荐','推荐_1','1'))) as a)"""}
 
     tpl_latest_tag = {"taixingxiao":"""select b.key_name,a.value from tbl_tag_taixingxiao as a ,tbl_key as b where a.desc_id like "taixingxiao.2.%" and b.key_name in ("{tag}") and a.key_id = b.id and a.corpus_id = {corpus_id} order by a.time desc limit 1"""}
 
@@ -34,6 +34,7 @@ class genstdanslib(abstract.abstract):
         self.passwd = kwargs["dbpasswd"]
         self.charset = "utf8"
         self.cursorclass = MySQLdb.cursors.DictCursor
+        self.stdlibs_basic_tags = kwargs["stdlibs_basic_tags"]
 
         self.conn = MySQLdb.connect(host=self.host,port=self.port,db=self.db,user=self.user,passwd=self.passwd,charset=self.charset,cursorclass=self.cursorclass)
         self.cursor = self.conn.cursor()
@@ -59,7 +60,11 @@ class genstdanslib(abstract.abstract):
             key,value = list(res.items())[0]
             query = a.execute(stmt=self.tpl_query.format(corpus_id=value))[0]["query"]
             result[query] = dict()
-            for tag in self.tags:
+            tags = []
+            tags = tags.extend(self.tags)
+            tags = tags.extend(self.stdlibs_basic_tags)
+            
+            for tag in tags:
                 tag_value = a.execute(stmt=self.tpl_latest_tag[self.project].format(tag="{}".format(tag),corpus_id=value))
                 if len(tag_value) == 0 or len(tag_value[0]["value"]) == 0 :
                     result[query][tag] = "Null"

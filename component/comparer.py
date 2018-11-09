@@ -17,8 +17,9 @@ class comparer(abstract.abstract):
         cur_time = time.strftime('%Y-%m-%d-%H_%M_%S',time.localtime(time.time()))
         self.output_file_basic_statistic = os.path.join(kwargs["output_dir_basic_statistic"],"{}-{}-{}.xlsx".format("basic",kwargs["project"],cur_time))
         self.output_dir_assitant_file = os.path.join(kwargs["output_dir_assitant_file"],"{}-{}-{}.xlsx".format("assitant",kwargs["project"],cur_time))
-        self.ComparerDict = {"default":self.compare_default}
+        self.ComparerDict = {"default":self.comparer_default}
         self.cursor = gentblunsolvedquery(**kwargs)
+        self.stdlibs_basic_tags = kwargs["stdlibs_basic_tags"]
 
     def process(self,info): 
         func = self.getComparer(self.comparer)
@@ -47,8 +48,95 @@ class comparer(abstract.abstract):
 
     def getComparer(self,label):
         return self.ComparerDict.get(label)
+
     
-    def compare_default(self,c1,c2):
+    def comparer_default(self,datafrombot,datafromstdlib):
+        """
+        params:
+        1. datafrombot: format like the followings
+                [
+                    {"query":...,tags:[
+                                    {"key":...,"value":...,"desc_id":...,"time":...},
+                                    {"key":...,"value":...,"desc_id":...,"time":...},
+                                    ...
+                                    ]},
+                    {"query":...,tags:[
+                                    {"key":...,"value":...,"desc_id":...,"time":...},
+                                    {"key":...,"value":...,"desc_id":...,"time":...},
+                                    ...
+                                    ]},
+                ]
+        
+        2. datafromstdlib: format like the followings
+                { 
+                    query1:{tag1:val1,tag2:val2,...,tagN:valN},
+                    query2:{tag1:val1,tag2:val2,...,tagN:valN},
+                    ...
+                }
+        return:
+                [
+                    {"query":...,tags:[
+                                    {"key":...,"value":...,"desc_id":...,"time":...},
+                                    {"key":...,"value":...,"desc_id":...,"time":...},
+                                    ...
+                                    ]
+                                ,extra_tags: {key1:value1,key2:value2}
+                    },
+                    {"query":...,tags:[
+                                    {"key":...,"value":...,"desc_id":...,"time":...},
+                                    {"key":...,"value":...,"desc_id":...,"time":...},
+                                    ...
+                                    ]
+                                ,extra_tags: {key1:value1,key2:value2}
+                    },
+                ]
+                
+        """
+        if datafrombot == "" or datafromstdlib == "" or len(datafrombot) == 0 or len(datafromstdlib) == 0:
+            return 0
+        basic_statistic_data = {"query":[],"inStdAns":[],"compare":[]}
+        for ele in datafrombot:
+            basic_statistic_data["query"].append(ele["query"])
+            ele["extra_tags"] = dict()
+            ele["extra_tags"]["sim_query"] = ""
+            ele["extra_tags"]["inStdAns"] = 0
+            ele["extra_tags"]["compare"] = ""
+
+            inStd = datafromstdlib.get(ele["query"],None)
+            if inStd is not None:
+                basic_statistic_data["inStdAns"].append(1)
+                ele["extra_tags"]["inStdAns"] = 1
+                if self.isSame(ele,inStd):
+                    basic_statistic_data["compare"].append(1)
+                    ele["extra_tags"]["compare"] = 1
+                else:
+                    basic_statistic_data["compare"].append(0)
+                    ele["extra_tags"]["compare"] = 0
+            else:
+                basic_statistic_data["inStdAns"].append(0)
+                basic_statistic_data["compare"].append("")
+                ele["extra_tags"]["sim_query"] = self.get_extra_info_from_unsolved_query_set("pquery",ele)
+        self.statistic(basic_statistic_data,["inStdAns","compare"])
+        return datafrombot
+
+    def isSame(self,eleinbot,eleinstd):
+        label = []
+        for ans_type in self.stdlibs_basic_tags:
+            if eleinstd[ans_type] != "Null":
+                label.append([ans_type,1])
+            else:
+                label.append([ans_type,0])
+        
+        while len(label) != 0:
+            cur = label.pop(0)
+            if cur[1] == 1:
+                if cur[0].endswith("标准答案"):
+                    return eleinbot["tags"]["result"] == eleinstd[cur[0]]
+                else:
+                    return eleinbot["tags"]["std_question"] == eleinstd[cur[0]]
+        return False
+    
+    def compare_test(self,c1,c2):
         if c1 == "" or c2 == "" or len(c1) == 0 or len(c2) == 0:
             return 0
         data = {"query":[],"inStdAns":[],"compare":[]}
