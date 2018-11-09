@@ -29,7 +29,7 @@ if __name__ == "__main__":
         conf = workflow.parse_conf(os.path.join(".","report.cfg"))
         conf["corpus"] = "input/unsolved_query.xlsx"
         a = accessRDB()
-        result = a.execute(stmt="""select query from tbl_corpus where id in (select distinct(corpus_id) from ((select distinct(corpus_id) from tbl_tag_taixingxiao where (desc_id = "taixingxiao.2.1" or desc_id = "taixingxiao.2.23") and key_id = 23 and value not in ('已解决','1.0','1_推荐','推荐_1')) union (select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id = "taixingxiao.2.22" and key_id = 48 and value = '未标注')) as a)""")
+        result = a.execute(stmt="""select query from tbl_corpus where id in (select distinct(corpus_id) from ((select distinct(corpus_id) from tbl_tag_taixingxiao where (desc_id = "taixingxiao.2.1" or desc_id = "taixingxiao.2.23") and key_id = 23 and value not in ('已解决','1.0','1_推荐','推荐_1','1')) union (select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id = "taixingxiao.2.22" and key_id = 48 and value = '未标注') union (select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id like "taixingxiao.5.%" and key_id = 67 and value not in ('已解决','1.0','1_推荐','推荐_1','1'))) as a)""")
         gen_corpus(result,conf["corpus"])
         info = dict()
         processors = [batchprocessingunsolvedquery(**conf),gentblunsolvedquery(**conf)]
