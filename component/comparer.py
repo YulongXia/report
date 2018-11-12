@@ -19,7 +19,7 @@ class comparer(abstract.abstract):
         self.output_dir_assitant_file = os.path.join(kwargs["output_dir_assitant_file"],"{}-{}-{}.xlsx".format("assitant",kwargs["project"],cur_time))
         self.ComparerDict = {"default":self.comparer_default}
         self.cursor = gentblunsolvedquery(**kwargs)
-        self.stdlibs_basic_tags = kwargs["stdlibs_basic_tags"]
+        self.tags_stdlib_basic = kwargs["tags_stdlib_basic"]
 
     def process(self,info): 
         func = self.getComparer(self.comparer)
@@ -110,30 +110,37 @@ class comparer(abstract.abstract):
                     basic_statistic_data["compare"].append(1)
                     ele["extra_tags"]["compare"] = 1
                 else:
+                    print(ele,inStd)
                     basic_statistic_data["compare"].append(0)
                     ele["extra_tags"]["compare"] = 0
             else:
                 basic_statistic_data["inStdAns"].append(0)
                 basic_statistic_data["compare"].append("")
-                ele["extra_tags"]["sim_query"] = self.get_extra_info_from_unsolved_query_set("pquery",ele)
+                #ele["extra_tags"]["sim_query"] = self.get_extra_info_from_unsolved_query_set("pquery",ele)
         self.statistic(basic_statistic_data,["inStdAns","compare"])
         return datafrombot
 
     def isSame(self,eleinbot,eleinstd):
         label = []
-        for ans_type in self.stdlibs_basic_tags:
+        for ans_type in self.tags_stdlib_basic:
             if eleinstd[ans_type] != "Null":
                 label.append([ans_type,1])
             else:
                 label.append([ans_type,0])
-        
         while len(label) != 0:
             cur = label.pop(0)
             if cur[1] == 1:
                 if cur[0].endswith("标准答案"):
-                    return eleinbot["tags"]["result"] == eleinstd[cur[0]]
+                    for tag in eleinbot["tags"]:
+                        if tag["key"] == "result":
+                            answer = tag["value"]
+                            break
                 else:
-                    return eleinbot["tags"]["std_question"] == eleinstd[cur[0]]
+                    for tag in eleinbot["tags"]:
+                        if tag["key"] == "std_question":
+                            answer = tag["value"]
+                            break
+                return answer.strip() == eleinstd[cur[0]].strip()
         return False
     
     def compare_test(self,c1,c2):
@@ -167,7 +174,7 @@ class comparer(abstract.abstract):
             else:
                 data["inStdAns"].append(0)
                 data["compare"].append("")
-                ele["extra_tags"]["sim_query"] = self.get_extra_info_from_unsolved_query_set("pquery",ele)
+                #ele["extra_tags"]["sim_query"] = self.get_extra_info_from_unsolved_query_set("pquery",ele)
         self.statistic(data,["inStdAns","compare"])
         return c1
     

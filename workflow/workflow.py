@@ -4,7 +4,7 @@ import os
 import importlib
 
 class workflow(object):
-    list_options = ["processors","tags_unsolved_query"]
+    list_options = ["processors","tags_unsolved_query","tags_stdlib_basic"]
     bool_options = ["flush_tbl_std_ans"]
     bool_value = ("t","true","1")
     def __init__(self,filename):
