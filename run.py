@@ -16,10 +16,19 @@ def gen_corpus(data,output):
     df.to_excel(output,index=False)
     return result
 
+def statistic(in_xlsx,out_xlsx,groupby_keys="inStdAns,hual_解决状态"):
+    df = pd.read_excel(in_xlsx)
+    grouped = df.groupby(groupby_keys.split(","))
+    count = grouped.agg(["count"])
+    count.to_excel(out_xlsx)
+    return grouped
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="run.py")
     parser.add_argument("--op")
+    parser.add_argument("--input")
+    parser.add_argument("--output")
     args = parser.parse_args()
     op = args.op
     if op == "workflow":
@@ -35,3 +44,7 @@ if __name__ == "__main__":
         processors = [batchprocessingunsolvedquery(**conf),gentblunsolvedquery(**conf)]
         for processor in processors:
             processor.process(info)
+    elif op == "statistic":
+        in_xlsx = args.input
+        out_xlsx = args.output
+        statistic(in_xlsx,out_xlsx)
