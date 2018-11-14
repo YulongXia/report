@@ -121,26 +121,30 @@ class comparer(abstract.abstract):
         return datafrombot
 
     def isSame(self,eleinbot,eleinstd):
-        label = []
         for ans_type in self.tags_stdlib_basic:
-            if eleinstd[ans_type] != "Null":
-                label.append([ans_type,1])
-            else:
-                label.append([ans_type,0])
-        while len(label) != 0:
-            cur = label.pop(0)
-            if cur[1] == 1:
-                if cur[0].endswith("标准答案"):
-                    for tag in eleinbot["tags"]:
-                        if tag["key"] == "result":
-                            answer = tag["value"]
-                            break
-                else:
-                    for tag in eleinbot["tags"]:
-                        if tag["key"] == "std_question":
-                            answer = tag["value"]
-                            break
-                return answer.strip() == eleinstd[cur[0]].strip()
+            if eleinstd[ans_type] != "Null" and ans_type in ["标准答案","hual_标准答案"]:
+                word1 = ""
+                for tag in eleinbot["tags"]:
+                    if tag["key"] == "result":
+                        word1 = tag["value"]
+                        break
+                if len(word1) == 0:
+                    return False
+                word1 = word1.strip()[:400]
+                word2 = eleinstd[ans_type].strip()[:400]
+                record = [[-1 for i in range(len(word1) + 1)] for j in range(len(word2) + 1)]
+                ed = self.MinEditingDistance(len(word1)-1,len(word2)-1,word1,word2,record)
+                if ed/len(word1) < 0.1:
+                    return True
+            elif eleinstd[ans_type] != "Null" and ans_type in ["标准问题"]:
+                std_question = ""
+                for tag in eleinbot["tags"]:
+                    if tag["key"] == "std_question":
+                        std_question = tag["value"]
+                        break
+                if len(std_question) == 0:
+                    return False
+                return std_question == eleinstd[ans_type].strip()
         return False
     
     def compare_test(self,c1,c2):
@@ -198,3 +202,31 @@ class comparer(abstract.abstract):
                 tmp = [ row["query"] for row in a.execute(stmt="""select query from tbl_corpus where id in ({ids})""".format(ids=res["corpus_ids"])) ]
                 ret = "\n---\n".join(tmp)
         return ret
+    
+
+    def MinEditingDistance(self,xi,yi,X,Y,record):
+        """
+        src : X
+        dst : Y
+        """
+        if record[yi+1][xi+1] >= 0:
+            return record[yi+1][xi+1]
+        if xi < 0:
+            record[yi+1][xi+1] = yi + 1
+            return yi + 1
+        if yi < 0:
+            record[yi+1][xi+1] = xi + 1
+            return xi + 1
+        # 增
+        a = self.MinEditingDistance(xi,yi-1,X,Y,record) + 1
+        # 删
+        b = self.MinEditingDistance(xi-1,yi,X,Y,record) + 1
+        # 改
+        c = self.MinEditingDistance(xi-1,yi-1,X,Y,record) + 1
+        if X[xi] == Y[yi]:
+            d = MinEditingDistance(xi-1,yi-1,X,Y,record)
+            record[yi+1][xi+1] = min(a,b,c,d)
+            return record[yi+1][xi+1]
+        else:
+            record[yi+1][xi+1] = min(a,b,c)
+            return record[yi+1][xi+1]
