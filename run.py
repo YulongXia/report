@@ -19,7 +19,7 @@ def gen_corpus(data,output):
 def statistic(in_xlsx,out_xlsx,groupby_keys="inStdAns,hual_解决状态"):
     df = pd.read_excel(in_xlsx)
     grouped = df.groupby(groupby_keys.split(","))
-    count = grouped.agg(["count"])
+    count = grouped[df.columns[0]].agg(["count"])
     count.to_excel(out_xlsx)
     return grouped
 
