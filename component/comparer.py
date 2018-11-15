@@ -224,7 +224,7 @@ class comparer(abstract.abstract):
         # 改
         c = self.MinEditingDistance(xi-1,yi-1,X,Y,record) + 1
         if X[xi] == Y[yi]:
-            d = MinEditingDistance(xi-1,yi-1,X,Y,record)
+            d = self.MinEditingDistance(xi-1,yi-1,X,Y,record)
             record[yi+1][xi+1] = min(a,b,c,d)
             return record[yi+1][xi+1]
         else:
