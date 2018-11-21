@@ -10,7 +10,8 @@ from data_management.accessdb.accessRDB import accessRDB
 from . import abstract
 
 class genstdanslib(abstract.abstract):
-    tpl_correct_corpus_ids = {"taixingxiao":"""select distinct(corpus_id) from tbl_tag_taixingxiao where (desc_id like "taixingxiao.2.%" or desc_id like "taixingxiao.5.%")and corpus_id not in (select distinct(corpus_id) from ((select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id = "taixingxiao.2.22" and key_id = (select id from tbl_key where key_name = "处理情况") and value = '未标注') union (select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id like "taixingxiao.5.%" and key_id = (select id from tbl_key where key_name = "hual_解决状态") and value not in ('已解决','1.0','1_推荐','推荐_1','1'))) as a)"""}
+    tpl_incorrect_corpus_ids = {"taixingxiao":"""select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id like "taixingxiao.5.%" and key_id = (select id from tbl_key where key_name = "hual_解决状态") and value not in ('已解决','1.0','1_推荐','推荐_1','1')"""}
+    tpl_correct_corpus_ids = {"taixingxiao":"""select distinct(corpus_id) from tbl_tag_taixingxiao where (desc_id like "taixingxiao.2.%" or desc_id like "taixingxiao.5.%")  and corpus_id not in ({incorrect_corpus_id})""".format(incorrect_corpus_id=tpl_incorrect_corpus_ids["taixingxiao"])}
 
     tpl_latest_tag = {"taixingxiao":"""select b.key_name,a.value from tbl_tag_taixingxiao as a ,tbl_key as b where (a.desc_id like "taixingxiao.2.%" or a.desc_id like "taixingxiao.5.%") and b.key_name in ("{tag}") and a.key_id = b.id and a.corpus_id = {corpus_id} order by a.time desc limit 1"""}
 
@@ -63,6 +64,7 @@ class genstdanslib(abstract.abstract):
             tags = []
             tags.extend(self.tags)
             tags.extend(self.tags_stdlib_basic)
+            tags = list(set(tags))
             
             for tag in tags:
                 tag_value = a.execute(stmt=self.tpl_latest_tag[self.project].format(tag="{}".format(tag),corpus_id=value))

@@ -110,7 +110,6 @@ class comparer(abstract.abstract):
                     basic_statistic_data["compare"].append(1)
                     ele["extra_tags"]["compare"] = 1
                 else:
-                    print(ele,inStd)
                     basic_statistic_data["compare"].append(0)
                     ele["extra_tags"]["compare"] = 0
             else:
@@ -121,30 +120,40 @@ class comparer(abstract.abstract):
         return datafrombot
 
     def isSame(self,eleinbot,eleinstd):
+        stdans_label = ["标准答案","hual_标准答案"]
+        intermediate = [ ans_type for ans_type in self.tags_stdlib_basic if ans_type not in stdans_label ]
         for ans_type in self.tags_stdlib_basic:
-            if eleinstd[ans_type] != "Null" and ans_type in ["标准答案","hual_标准答案"]:
-                word1 = ""
+            if eleinstd[ans_type] != "Null" and ans_type in stdans_label:
+                # s1: realtime answer
+                # s2: correct answer
+                s1 = ""
                 for tag in eleinbot["tags"]:
                     if tag["key"] == "result":
-                        word1 = tag["value"]
+                        s1 = tag["value"]
                         break
-                if len(word1) == 0:
+                if len(s1) == 0:
                     return False
-                word1 = word1.strip()[:400]
-                word2 = eleinstd[ans_type].strip()[:400]
+                s2 = eleinstd[ans_type].strip()
+                s1 = self.regularization(s1)
+                s2 = self.regularization(s2)
+                word1 = s1[:400]
+                word2 = s2[:400]
                 record = [[-1 for i in range(len(word1) + 1)] for j in range(len(word2) + 1)]
                 ed = self.MinEditingDistance(len(word1)-1,len(word2)-1,word1,word2,record)
-                if ed/len(word1) < 0.1:
+                if ed/(len(word1)+1) < 0.1:
                     return True
-            elif eleinstd[ans_type] != "Null" and ans_type in ["标准问题"]:
-                std_question = ""
+                if s2 in s1:
+                    return True
+            elif ans_type in intermediate:
+                tag_value = ""
                 for tag in eleinbot["tags"]:
-                    if tag["key"] == "std_question":
-                        std_question = tag["value"]
+                    if tag["key"] == ans_type:
+                        tag_value = tag["value"]
                         break
-                if len(std_question) == 0:
+                if tag_value != eleinstd[ans_type].strip():
                     return False
-                return std_question == eleinstd[ans_type].strip()
+        if len(intermediate) != 0:
+            return True    
         return False
     
     def compare_test(self,c1,c2):
@@ -230,3 +239,15 @@ class comparer(abstract.abstract):
         else:
             record[yi+1][xi+1] = min(a,b,c)
             return record[yi+1][xi+1]
+
+
+
+    def regularization(self,t):
+        t = re.sub(r"<br>",r"\n",t)
+        t = re.sub(r"^[^：:]+[：:]",r"",t)
+        t = re.sub(r"<img src='(\S+)'/>",r"\g<1>",t)
+        t = re.sub(r"<[^>]+>",r"",t)
+        # t = re.sub(r"[\s\u0020-\u007f\u2000-\u206f\u3000-\u303f\uff00-\uffef\uf075]+","",t)
+        t = re.sub(r"[\s\.\!\/_,$%^*()?;；:\-【】\"\'\[\]——！，;:。？、~@#￥%……&*（）]+","",t)
+        t = re.sub(r".+您可能关注以下问题.+",r"",t)
+        return t

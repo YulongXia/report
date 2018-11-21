@@ -8,6 +8,7 @@ from report.workflow.workflow import workflow
 from report.component.batchprocessingunsolvedquery import batchprocessingunsolvedquery
 from report.component.gentblunsolvedquery import gentblunsolvedquery
 from report.component.comparer import comparer
+from report.component.genstdanslib import genstdanslib
 from data_management.accessdb.accessRDB import accessRDB
 
 def gen_corpus(data,output):
@@ -38,7 +39,7 @@ if __name__ == "__main__":
         conf = workflow.parse_conf(os.path.join(".","report.cfg"))
         conf["corpus"] = "input/unsolved_query.xlsx"
         a = accessRDB()
-        result = a.execute(stmt="""select query from tbl_corpus where id in (select distinct(corpus_id) from ((select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id = "taixingxiao.2.22" and key_id = (select id from tbl_key where key_name = "处理情况") and value = '未标注') union (select distinct(corpus_id) from tbl_tag_taixingxiao where desc_id like "taixingxiao.5.%" and key_id = (select id from tbl_key where key_name = "hual_解决状态") and value not in ('已解决','1.0','1_推荐','推荐_1','1'))) as a)""")
+        result = a.execute(stmt="""select query from tbl_corpus where id in (select distinct(corpus_id) from ({incorrect_corpus_id})""".format(incorrect_corpus_id=genstdanslib.tpl_incorrect_corpus_ids["taixingxiao"]))
         gen_corpus(result,conf["corpus"])
         info = dict()
         processors = [batchprocessingunsolvedquery(**conf),gentblunsolvedquery(**conf)]
