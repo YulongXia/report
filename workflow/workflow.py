@@ -7,8 +7,11 @@ class workflow(object):
     list_options = ["processors","tags_unsolved_query","tags_stdlib_basic"]
     bool_options = ["flush_tbl_std_ans"]
     bool_value = ("t","true","1")
-    def __init__(self,filename):
-        self.conf = self.parse_conf(filename)
+    def __init__(self,filename,conf=None):
+        if conf is None:
+            self.conf = self.parse_conf(filename)
+        else:
+            self.conf = conf
         self.processors = []
         for processor in self.conf["processors"]:
             module = importlib.import_module('report.component.{}'.format(processor))

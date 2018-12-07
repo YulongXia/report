@@ -35,6 +35,12 @@ if __name__ == "__main__":
     if op == "workflow":
         wf = workflow(os.path.join(".","report.cfg"))
         wf.run()
+    if op == "gen-tbl-std-ans":
+        conf = workflow.parse_conf(os.path.join(".","report.cfg"))
+        conf["processors"] = ['genstdanslib']
+        conf["flush_tbl_std_ans"] = True
+        wf = workflow(None,conf=conf)
+        wf.run()
     elif op == "gen-tbl-unsolved-query":
         conf = workflow.parse_conf(os.path.join(".","report.cfg"))
         conf["corpus"] = "input/unsolved_query.xlsx"

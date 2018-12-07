@@ -151,7 +151,14 @@ class comparer(abstract.abstract):
                     if tag["key"] == ans_type:
                         tag_value = tag["value"]
                         break
-                if tag_value != eleinstd[ans_type].strip():
+                std_tag_value = ""
+                if eleinstd[ans_type].strip() != "Null":
+                   std_tag_value = eleinstd[ans_type].strip()
+                #std_tag_value = eleinstd[ans_type].strip()
+                if tag_value != std_tag_value:
+                    print(tag_value)
+                    print(std_tag_value)
+                    print("---------------")
                     return False
         if len(intermediate) != 0:
             return True    

@@ -2,6 +2,7 @@
 input/
 std_json/
 output/
+report.cfg
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
