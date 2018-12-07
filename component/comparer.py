@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import json
 import codecs
+import re
 
 from data_management.databroker.databroker import databroker
 from data_management.accessdb.accessRDB import accessRDB
