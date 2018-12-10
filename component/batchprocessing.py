@@ -32,9 +32,9 @@ class batchprocessing(abstract.abstract):
         raw_corpus = dict()
         for row in rows:
             if row["corpus_id"] in raw_corpus:
-                row["corpus_id"].append({ key:value for x in row for key,value in x.items() })
+                raw_corpus[row["corpus_id"]].append(row)
             else:
-                row["corpus_id"] = [ { key:value for x in row for key,value in x.items() } ]
+                raw_corpus[row["corpus_id"]] = [row]
         for ele in data:
             ele["extra_tags"] = dict()
             ele["extra_tags"]["times"] = 0
@@ -52,7 +52,8 @@ class batchprocessing(abstract.abstract):
                 appearences.append(res[0]["time"])
             ele["extra_tags"]["times"] = len(appearences)
             ele["extra_tags"]["appearences"] = "\n".join(appearences)
-           
+
+        result_json = json.dumps(data,ensure_ascii=False)   
         info[self.__class__.__name__] = result_json    
         return result_json
         
