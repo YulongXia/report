@@ -45,7 +45,7 @@ if __name__ == "__main__":
         conf = workflow.parse_conf(os.path.join(".","report.cfg"))
         conf["corpus"] = "input/unsolved_query.xlsx"
         a = accessRDB()
-        result = a.execute(stmt="""select query from tbl_corpus where id in ({incorrect_corpus_id})""".format(incorrect_corpus_id=genstdanslib.tpl_incorrect_corpus_ids["taixingxiao"]))
+        result = a.execute(stmt="""select query from tbl_corpus where id in ({incorrect_corpus_id})""".format(incorrect_corpus_id=genstdanslib.tpl_incorrect_corpus_ids[conf["project"]]))
         gen_corpus(result,conf["corpus"])
         info = dict()
         processors = [batchprocessingunsolvedquery(**conf),gentblunsolvedquery(**conf)]

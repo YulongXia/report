@@ -60,12 +60,16 @@ class comparer(abstract.abstract):
                                     {"key":...,"value":...,"desc_id":...,"time":...},
                                     {"key":...,"value":...,"desc_id":...,"time":...},
                                     ...
-                                    ]},
+                                    ]
+                                ,extra_tags: {key1:value1,key2:value2}
+                                },
                     {"query":...,tags:[
                                     {"key":...,"value":...,"desc_id":...,"time":...},
                                     {"key":...,"value":...,"desc_id":...,"time":...},
                                     ...
-                                    ]},
+                                    ]
+                                ,extra_tags: {key1:value1,key2:value2}
+                                },
                 ]
         
         2. datafromstdlib: format like the followings
@@ -98,7 +102,6 @@ class comparer(abstract.abstract):
         basic_statistic_data = {"query":[],"inStdAns":[],"compare":[]}
         for ele in datafrombot:
             basic_statistic_data["query"].append(ele["query"])
-            ele["extra_tags"] = dict()
             ele["extra_tags"]["sim_query"] = ""
             ele["extra_tags"]["inStdAns"] = 0
             ele["extra_tags"]["compare"] = ""
