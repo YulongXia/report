@@ -4,6 +4,7 @@ import os
 import importlib
 import argparse
 import pandas as pd
+import json
 from report.workflow.workflow import workflow
 from report.component.batchprocessingunsolvedquery import batchprocessingunsolvedquery
 from report.component.gentblunsolvedquery import gentblunsolvedquery
@@ -55,3 +56,8 @@ if __name__ == "__main__":
         in_xlsx = args.input
         out_xlsx = args.output
         statistic(in_xlsx,out_xlsx)
+    elif op == "test":
+        wf = workflow(os.path.join(".","report.cfg"))
+        result_json = wf.processors[0].getDataFromStdAns()
+        with codecs.open("/home/xiayulong/work/tmp/1.txt","w",encoding="utf-8") as f:
+            json.dump(f,ensure_ascii=False)
