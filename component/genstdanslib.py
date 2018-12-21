@@ -98,6 +98,4 @@ class genstdanslib(abstract.abstract):
         result = self.cursor.fetchall()
         return result
 
-        
-        
 
