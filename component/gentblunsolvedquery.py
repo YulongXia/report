@@ -32,6 +32,8 @@ class gentblunsolvedquery(genstdanslib.genstdanslib):
                 if tag["key"] in self.tags_unsolved_query:
                     print(query)
                     corpus_id = a.execute(stmt=self.tpl_corpus_id.format(query=query))[0]["id"]
+                    tag["value"] = tag["value"].replace('"','\\"')
+                    query = query.replace('"','\\"')
                     self.execute(stmt=self.tpl_insert_unsloved_query.format(tbl=self.tbl_unsolved_query,key_name=tag["key"],value=tag["value"],corpus_id=corpus_id,query=query,time=cur_time))
         return 
     

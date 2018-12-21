@@ -1,0 +1,10 @@
+0. 存放badcase到指定目录下（data_management/input/泰康badcase/当天日期如20181220/）
+1. data_management模块创建task,description为badcase存放路径的一部分，如“泰康badcase/20181220/badcase-xxx.xlsx”
+2. data_management模块上一步task下的指定batch_id 为1的batch,其描述同task一样，如“泰康badcase/20181220/badcase-xxx.xlsx”
+3. 将其导入到data_management数据库中，desc_id依据生成batch的task_id和batch_id来生成
+4. 将上述导入的文件导出非重复的版本到report模块的input目录下
+5. report模块修改配置，跑测试，将其文件给需要的用户
+至此初始badcase入库已完成，下面可针对这批badcase不断迭代处理
+1. 待用户将这批语料处理完成后，将badcase存放至data_management/input/泰康已处理badcase/“处理完的那天的日期”/
+2. 找到这badcase对应的task,在此task下开启新的batch,batch_id比历史最大自增1即可，description是已处理badcase文件存放路径的一部分，如"泰康已处理badcase/20181220/assistant-badcase-xxx.xlsx"
+3. 将其导入到data_management数据库中，desc_id依据生成batch的task_id和batch_id来生成
