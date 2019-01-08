@@ -60,4 +60,4 @@ if __name__ == "__main__":
         wf = workflow(os.path.join(".","report.cfg"))
         result_json = wf.processors[0].getDataFromStdAns()
         with codecs.open("/home/xiayulong/work/tmp/1.txt","w",encoding="utf-8") as f:
-            json.dump(f,ensure_ascii=False)
+            json.dump(result_json,f,ensure_ascii=False)
