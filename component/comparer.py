@@ -15,9 +15,10 @@ from . import abstract
 class comparer(abstract.abstract):
     def __init__(self,**kwargs):
         self.comparer = kwargs["comparer"]
+        filename = '.'.join(kwargs["corpus"].split('/')[-1].split('.')[:-1])
         cur_time = time.strftime('%Y-%m-%d-%H_%M_%S',time.localtime(time.time()))
-        self.output_file_basic_statistic = os.path.join(kwargs["output_dir_basic_statistic"],"{}-{}-{}.xlsx".format("basic",kwargs["project"],cur_time))
-        self.output_dir_assitant_file = os.path.join(kwargs["output_dir_assitant_file"],"{}-{}-{}.xlsx".format("assitant",kwargs["project"],cur_time))
+        self.output_file_basic_statistic = os.path.join(kwargs["output_dir_basic_statistic"],"{}-{}-{}-{}.xlsx".format("basic",kwargs["project"],filename,cur_time))
+        self.output_dir_assitant_file = os.path.join(kwargs["output_dir_assitant_file"],"{}-{}-{}-{}.xlsx".format("assitant",kwargs["project"],filename,cur_time))
         self.ComparerDict = {"default":self.comparer_default}
         self.cursor = gentblunsolvedquery(**kwargs)
         self.tags_stdlib_basic = kwargs["tags_stdlib_basic"]

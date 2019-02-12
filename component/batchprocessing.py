@@ -23,11 +23,16 @@ class batchprocessing(abstract.abstract):
         self.tags = kwargs["tags"]
         self.url = self.url_tpl.format(host=self.host,port=self.port,bot=self.bot)
         self.project = kwargs["project"]
+        self.sequencemode = kwargs.get("sequencemode","0")
+        if self.sequencemode == "1":
+            self.sequencemode = True
+        else:
+            self.sequencemode = False
 
     def process(self,info): 
         d = databroker(*self.tags,url=self.url,corpus=self.corpus)
         desc_id = "batchprocessing-" + time.strftime('%Y-%m-%d-%H_%M_%S',time.localtime(time.time()))
-        result_json = d.Standardize(desc_id,output=None)
+        result_json = d.Standardize(desc_id,output=None,Sequence=self.sequencemode)
         data = json.loads(result_json)
         a = accessRDB()
         rows = a.execute(stmt=self.sql_raw_corpus[self.project])
