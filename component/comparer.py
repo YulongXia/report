@@ -103,7 +103,7 @@ class comparer(abstract.abstract):
         basic_statistic_data = {"query":[],"inStdAns":[],"compare":[]}
         for ele in datafrombot:
             basic_statistic_data["query"].append(ele["query"])
-            ele["extra_tags"]["sim_query"] = ""
+            ele["extra_tags"]["newDataResult"] = ""
             ele["extra_tags"]["inStdAns"] = 0
             ele["extra_tags"]["compare"] = ""
 
@@ -120,7 +120,7 @@ class comparer(abstract.abstract):
             else:
                 basic_statistic_data["inStdAns"].append(0)
                 basic_statistic_data["compare"].append("")
-                #ele["extra_tags"]["sim_query"] = self.get_extra_info_from_unsolved_query_set("pquery",ele)
+                ele["extra_tags"]["newDataResult"] = self.get_extra_info_from_unsolved_query_set("result",ele)
         self.statistic(basic_statistic_data,["inStdAns","compare"])
         return datafrombot
 
@@ -199,7 +199,7 @@ class comparer(abstract.abstract):
             else:
                 data["inStdAns"].append(0)
                 data["compare"].append("")
-                #ele["extra_tags"]["sim_query"] = self.get_extra_info_from_unsolved_query_set("pquery",ele)
+                ele["extra_tags"]["sim_query"] = self.get_extra_info_from_unsolved_query_set("result",ele)
         self.statistic(data,["inStdAns","compare"])
         return c1
     
@@ -211,17 +211,28 @@ class comparer(abstract.abstract):
         return grouped
     
     def get_extra_info_from_unsolved_query_set(self,tag,data):
-        tpl_aggregate = """select value,group_concat(corpus_id) as corpus_ids from tbl_unsolved_query where key_name = "{tag}" group by value"""
-        ret = "Null"
         a = accessRDB()
-        result = self.cursor.execute(stmt=tpl_aggregate.format(tag=tag))
-        target = [ t for t in data["tags"] if t["key"] == tag ]
-        if len(target) == 0:
-            return ret
-        for res in result:
-            if res["value"] == target[0]["value"]:                    
-                tmp = [ row["query"] for row in a.execute(stmt="""select query from tbl_corpus where id in ({ids})""".format(ids=res["corpus_ids"])) ]
-                ret = "\n---\n".join(tmp)
+        ret = "Null"
+        if tag=="pquery":
+            tpl_aggregate = """select value,group_concat(corpus_id) as corpus_ids from tbl_unsolved_query where key_name = "{tag}" group by value"""
+            result = self.cursor.execute(stmt=tpl_aggregate.format(tag=tag))
+            target = [ t for t in data["tags"] if t["key"] == tag ]
+            if len(target) == 0:
+                return ret
+            for res in result:
+                if res["value"] == target[0]["value"]:                    
+                    tmp = [ row["query"] for row in a.execute(stmt="""select query from tbl_corpus where id in ({ids})""".format(ids=res["corpus_ids"])) ]
+                    ret = "\n---\n".join(tmp)
+        elif tag=="result":
+            tpl_result_sql = """select value from tbl_unsolved_query where key_name = "result" and query = "{query}" """
+            result = self.cursor.execute(stmt=tpl_result_sql.format(query=data["query"]))
+            target = [ t for t in data["tags"] if t["key"] == tag ]
+            if len(target) == 0:
+                return ret
+            if result[0]["value"] == target[0]["value"]:
+                ret = "1"
+            else:
+                ret = "0"
         return ret
     
 
