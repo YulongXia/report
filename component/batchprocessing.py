@@ -68,5 +68,3 @@ class batchprocessing(abstract.abstract):
         result_json = json.dumps(data,ensure_ascii=False)   
         info[self.__class__.__name__] = result_json    
         return result_json
-        
-

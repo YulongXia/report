@@ -30,7 +30,6 @@ class gentblunsolvedquery(genstdanslib.genstdanslib):
             #    continue
             for tag in ele["tags"]:
                 if tag["key"] in self.tags_unsolved_query:
-                    print(query)
                     corpus_id = a.execute(stmt=self.tpl_corpus_id.format(query=query))[0]["id"]
                     tag["value"] = tag["value"].replace('"','\\"')
                     query = query.replace('"','\\"')
@@ -42,7 +41,3 @@ class gentblunsolvedquery(genstdanslib.genstdanslib):
         self.conn.commit()
         result = self.cursor.fetchall()
         return result
-
-        
-        
-

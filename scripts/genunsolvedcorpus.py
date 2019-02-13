@@ -15,6 +15,6 @@ unsolved_queries_sql="""select query from tbl_corpus where id not in (select dis
 cursor.execute(unsolved_queries_sql)
 unsolved_queries=[ row[0] for row in cursor.fetchall() ]
 df=pd.DataFrame({"query":unsolved_queries})
-df.to_excel("../../input/unsolved_query.xlsx",index=False)
+df.to_excel("../input/unsolved_query.xlsx",index=False,engine="xlsxwriter")
 
 

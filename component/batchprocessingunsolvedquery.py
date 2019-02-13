@@ -11,3 +11,4 @@ class batchprocessingunsolvedquery(batchprocessing.batchprocessing):
         super().__init__(**kwargs)
         self.tags = kwargs["tags_unsolved_query"]
         self.url = self.url_tpl.format(host=self.host,port=self.port,bot=self.bot)
+        self.corpus = kwargs["corpus_unsolved_query"]
